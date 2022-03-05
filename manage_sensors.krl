@@ -268,4 +268,21 @@ ruleset manage_sensors {
             ent:subscription_data{event:attrs{"Id"}} := tx
         }
     }
+
+    rule introduce_manager_and_sensor {
+        select when manage_sensors add_request
+        pre {
+            sensor_name = event:attrs{"sensor_name"}
+            name = event:attrs{"name"}
+        }
+
+        event:send({"eci": ent:sensors{[sensor_name, "wellKnown_eci"]},
+            "domain": "wrangler", "name":"subscription",
+            "attrs": {
+                "wellKnown_Tx": event:attrs{"wellKnown_Tx"},
+                "Rx_role":"Manager", "Tx_role":"Sensor",
+                "name": name+"-subscription", "channel_type":"subscription"
+            }
+        })
+    }
 }
