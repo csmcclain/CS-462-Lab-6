@@ -17,23 +17,23 @@ ruleset manage_sensors {
         }
 
         get_temperatures = function() {
-            ent:sensors.values().map(function(data) {
+            ent:subscription_data.values().map(function(eci) {
 
-                wrangler:picoQuery(data{"eci"}, "temperature_store", "temperatures")
+                wrangler:picoQuery(eci, "temperature_store", "temperatures")
             })
         }
 
         defaultThreshold = 75
         defaultSMSReceiver = "8013191995"
 
-        tags = ["sensor"]
-        event_policy = {
-            "allow": [{"domain": "*", "name": "*"}],
-            "deny": []
-        }
-        query_policy = {
-            "allow": [{"rid": "*", "name": "*"}]
-        }
+        // tags = ["sensor"]
+        // event_policy = {
+        //     "allow": [{"domain": "*", "name": "*"}],
+        //     "deny": []
+        // }
+        // query_policy = {
+        //     "allow": [{"rid": "*", "name": "*"}]
+        // }
     }
 
     rule init {
@@ -43,6 +43,7 @@ ruleset manage_sensors {
         
         notfired {
           ent:sensors := {}
+          ent:subscription_data := {}
         }
       }
 
@@ -252,7 +253,19 @@ ruleset manage_sensors {
                 "name": sensor_name+"-subscription", "channel_type":"subscription"
             }
         })
+    }
 
+    rule get_subscription_role {
+        select when wrangler subscription_added
+        pre {
+            tx_role = event:attrs{"Tx_role"}
+            rx_role = event:attrs{"Rx_role"}
+            tx = event:attrs{"Tx"}
+        }
+        if tx_role == "Manager" && rx_role == "Sensor" then noop()
 
+        fired {
+            ent:subscription_data{event:attrs{"Id"}} := tx
+        }
     }
 }
