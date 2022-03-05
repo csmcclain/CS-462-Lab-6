@@ -1,9 +1,11 @@
 ruleset manage_sensors {
 
     meta {
+
         use module io.picolabs.wrangler alias wrangler
         use module io.picolabs.subscription alias subs
-        shares sensors, get_temperatures
+        use module management_profile alias profile
+        shares sensors, get_temperatures   
     }
 
     global {
@@ -25,15 +27,6 @@ ruleset manage_sensors {
 
         defaultThreshold = 75
         defaultSMSReceiver = "8013191995"
-
-        // tags = ["sensor"]
-        // event_policy = {
-        //     "allow": [{"domain": "*", "name": "*"}],
-        //     "deny": []
-        // }
-        // query_policy = {
-        //     "allow": [{"rid": "*", "name": "*"}]
-        // }
     }
 
     rule init {
@@ -169,6 +162,7 @@ ruleset manage_sensors {
         pre {
             eci = event:attrs{"eci"}
             name = event:attrs{"name"}
+            sms_receiver = profile:get_sms()
         }
 
         event:send(

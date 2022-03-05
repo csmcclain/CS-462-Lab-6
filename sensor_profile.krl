@@ -18,7 +18,6 @@ ruleset sensor_profile {
         }
     }
 
-
     rule process_profile_update {
         // Define when rule is selected
         select when sensor profile_update
@@ -84,5 +83,15 @@ ruleset sensor_profile {
             raise wrangler event "inbound_rejection"
                 attributes event:attrs
         }
+    }
+
+    rule notify_management {
+        select when sensor notify_management_of_violation
+
+        event:send({"eci": ent:subscriptionTx,
+            "domain": "management", "type": "alert_threshold",
+            "eid": "threshold-violation",
+            "attrs": event:attrs
+        })
     }
 }
