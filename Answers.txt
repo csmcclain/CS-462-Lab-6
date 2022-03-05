@@ -1,0 +1,42 @@
+1. Why might an auto-approval rule for subscriptions be considered insecure?
+    I think it's insecure because anybody can now connect to our pico without
+    authenticating. They get full access to our api without providing any 
+    credentials.
+
+2. Can you put a sensor pico in more than one sensor management pico 
+(i.e. can it have subscriptions to more than one sensor management pico)?
+    Sure! You'd just have to keep track of the Subscriptions and send events to 
+    both managers.
+
+3. Imagine I have sensor types besides temperature sensors (e.g. pressure, 
+humidity, air quality, etc.). How would you properly manage collections of sensors 
+that include heterogeneous sensor types? 
+    I think I could have different domain event names managed by different types
+    of managers. The sub managers could connect to one large one or just work independently.
+
+4. Describe how you'd use the techniques from this lesson to create collections of temperature 
+sensors in particular rooms or areas of a building. For example, I would still have the sensor 
+management pico, but might have collections for each floor in a building.
+    First I would create Temperature Sensor Managers for each secion to monitor (IE section by,
+    floor, building, room, etc). Then I could have one manager that sits on top of all the sub 
+    managers. New created sensors could then connect to the sub manager that corresponds to its location
+    and notify that manager of incidents. The sub managers can then notify the main manager if 
+    needed.
+
+5. Can a sensor pico belong to more than one collection? After the modifications of this lab, 
+if a sensor belonged to more than one collection and had a threshold violation, what would happen?
+    Sure it can completly beling to more than one collection. It would just have to insure that
+    it keeps track of which subscriptions are managers and send info to the managers.
+
+6. When you moved threshold violation notifications from the sensor to the management ruleset, did 
+you add the rules to an existing ruleset or create a new one? Why?
+    I moved it into the management profile ruleset. To me it seemed like a logical separation cause
+    then I could swap out the profile when needed insteaed of swapping out the entire ruleset.
+
+7. When you moved threshold violation notifications from the sensor to the management ruleset, did 
+you add only one rule or more than one rule to achieve this end? Which rules did you add and why 
+(i.e. justify the architectural decisions did you made)?
+    I modified the threshold violation in my sensor profile and added a rule in my management profile.
+    I had to modify my sensor profile to call my manager subscription and I dind't want to complicate
+    an existing rule so I created a new one to handle the threshold violations and sending the twilio
+    sms.
