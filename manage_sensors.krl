@@ -254,6 +254,22 @@ ruleset manage_sensors {
         })
     }
 
+    rule accept_subscriptions {
+        select when wrangler inbound_pending_subscription_added
+        pre {
+            my_role = event:attrs{"Rx_role"}
+            their_role = event:attrs{"Tx_role"}
+        }
+        if my_role=="Manager" && their_role=="Manager w/o picos" then noop()
+        fired {
+            raise wrangler event "pending_subscription_approval"
+                attributes event:attrs
+        } else {
+            raise wrangler event "inbound_rejection"
+                attributes event:attrs
+        }
+    }
+
     rule get_subscription_role {
         select when wrangler subscription_added
         pre {
