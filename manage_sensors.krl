@@ -5,7 +5,7 @@ ruleset manage_sensors {
         use module io.picolabs.wrangler alias wrangler
         use module io.picolabs.subscription alias subs
         use module management_profile alias profile
-        shares sensors, get_temperatures   
+        shares sensors, get_temperatures, get_sub_data   
     }
 
     global {
@@ -18,9 +18,13 @@ ruleset manage_sensors {
             <<Sensor #{random:uuid}>>
         }
 
-        get_temperatures = function() {
-            ent:subscription_data.values().map(function(eci) {
+        get_sub_data = function() {
+            ent:subscription_data
+        }
 
+        get_temperatures = function() {
+            ent:subscription_data.values().map(function(tx) {
+                eci = tx
                 wrangler:picoQuery(eci, "temperature_store", "temperatures")
             })
         }
@@ -204,6 +208,7 @@ ruleset manage_sensors {
 
         always {
             ent:sensors := {}
+            ent:subscription_data := {}
         }
     }
 
